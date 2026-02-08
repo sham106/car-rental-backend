@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'lexuBackend.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 # Use SQLite if PostgreSQL environment variables are not set (for local development)
-if os.environ.get('DB_HOST') or os.environ.get('DATABASE_URL'):
+if os.environ.get('DB_HOST'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
