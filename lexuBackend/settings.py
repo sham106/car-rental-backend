@@ -26,7 +26,7 @@ load_dotenv(dotenv_path=BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7#a833^q5e+gd*-%0ng(jfa4)c*hy9vek*97vqh)pu(xh63g5w'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
@@ -55,9 +55,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -67,6 +67,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'lexuBackend.urls'
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 
 TEMPLATES = [
     {
@@ -95,9 +99,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('DB_NAME', 'postgres'),
         'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'Waweza554wa'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
         'PORT': os.environ.get('DB_PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 
@@ -202,7 +209,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Frontend URL for notifications
-FRONTEND_URL = 'http://localhost:5173'
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
 
 # WhatsApp/Twilio Settings (optional)
 # TWILIO_ACCOUNT_SID = 'your-twilio-account-sid'
