@@ -29,7 +29,7 @@ load_dotenv(dotenv_path=BASE_DIR / '.env')
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '.vercel.app', '.onrender.com']
 
@@ -188,7 +188,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://car-rental-frontend-nu-seven.vercel.app",
-    "https://*.vercel.app",
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
 ]
 
 # Allow credentials for CORS
@@ -208,7 +211,6 @@ INAPP_ADMIN_EMAIL = 'shamadmin@gmail.com'
 ADMIN_EMAIL = 'shamsikush@gmail.com'
 
 # Get SendGrid API key from environment variable for security
-import os
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 
 # SendGrid SMTP Configuration
