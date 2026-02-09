@@ -191,6 +191,12 @@ CORS_ALLOWED_ORIGINS = [
     "https://*.vercel.app",
 ]
 
+# Allow credentials for CORS
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow all headers in preflight requests
+CORS_ALLOW_ALL_ORIGINS = False
+
 # Email Settings
 # IMPORTANT: This must match the Single Sender Identity you verified in SendGrid
 DEFAULT_FROM_EMAIL = 'shambachsikuku@gmail.com'
