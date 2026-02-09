@@ -213,13 +213,9 @@ ADMIN_EMAIL = 'shamsikush@gmail.com'
 # Get SendGrid API key from environment variable for security
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 
-# SendGrid SMTP Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'apikey'  # This is the exact string 'apikey' for SendGrid
-EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+# SendGrid HTTP API Configuration (recommended for hosted platforms)
+EMAIL_BACKEND = 'sendgrid_backend.sendgrid.EmailBackend'
+SG_API_KEY = os.environ.get('SENDGRID_API_KEY')
 
 # Media files (uploaded content)
 MEDIA_URL = '/media/'
