@@ -4,11 +4,32 @@ Utility functions for notifications.
 from django.core.mail import send_mail
 from django.conf import settings
 import traceback
+import threading
+
+
+def _send_email_sync(subject, message, admin_email):
+    """
+    Internal synchronous email sending function.
+    """
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL or 'noreply@luxedrive.com',
+            recipient_list=[admin_email],
+            fail_silently=False,
+        )
+        print(f"SUCCESS: Email sent to: {admin_email}")
+    except Exception as e:
+        print(f"ERROR: Failed to send email: {e}")
+        print(f"Error type: {type(e).__name__}")
+        traceback.print_exc()
 
 
 def send_booking_email_notification(booking, admin_email):
     """
     Send email notification to admin when a new booking is made.
+    Uses async threading to avoid blocking the main request.
     """
     booking_url = f"{getattr(settings, 'FRONTEND_URL', None) or 'http://localhost:5173'}/#/admin/bookings"
     
@@ -37,75 +58,12 @@ def send_booking_email_notification(booking, admin_email):
     print(f"EMAIL_PORT: {settings.EMAIL_PORT}")
     print(f"EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
     
-    try:
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL or 'noreply@luxedrive.com',
-            recipient_list=[admin_email],
-            fail_silently=False,
-        )
-        print(f"SUCCESS: Email sent to: {admin_email}")
-        return True
-    except Exception as e:
-        print(f"ERROR: Failed to send email: {e}")
-        print(f"Error type: {type(e).__name__}")
-        traceback.print_exc()
-        return False
-
-
-def send_booking_whatsapp_notification(booking, admin_phone):
-    """
-    Send WhatsApp notification to admin using Twilio.
-    Requires: pip install twilio
-    """
-    if not hasattr(settings, 'TWILIO_ACCOUNT_SID') or not settings.TWILIO_ACCOUNT_SID:
-        print("Twilio not configured, skipping WhatsApp notification")
-        return False
+    # Start email sending in a background thread to avoid blocking the request
+    email_thread = threading.Thread(
+        target=_send_email_sync,
+        args=(subject, message, admin_email),
+        daemon=True
+    )
+    email_thread.start()
     
-    try:
-        from twilio.rest import Client
-        from twilio.http.http_client import TwilioHTTPClient
-        
-        # Custom HTTP client with SSL handling
-        class CustomHTTPClient(TwilioHTTPClient):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.session.verify = False  # Disable SSL verification
-        
-        client = Client(
-            settings.TWILIO_ACCOUNT_SID, 
-            settings.TWILIO_AUTH_TOKEN,
-            http_client=CustomHTTPClient()
-        )
-        
-        booking_url = f"{getattr(settings, 'FRONTEND_URL', None) or 'http://localhost:5173'}/#/admin/bookings"
-        
-        message_body = f"""
-        🚗 *New Booking - LuxeDrive*
-        
-        Ref: {booking.booking_reference}
-        Customer: {booking.driver_name}
-        Phone: {booking.driver_phone}
-        Vehicle: #{booking.vehicle_id}
-        Dates: {booking.pickup_date} to {booking.return_date}
-        Total: ${booking.total_price}
-        
-        View: {booking_url}
-        """
-        
-        message = client.messages.create(
-            from_='whatsapp:+14155238886',  # Twilio sandbox number
-            to=f'whatsapp:{admin_phone}',
-            body=message_body
-        )
-        
-        print(f"WhatsApp sent: {message.sid}")
-        return True
-        
-    except ImportError:
-        print("Twilio not installed. Run: pip install twilio")
-        return False
-    except Exception as e:
-        print(f"Failed to send WhatsApp: {e}")
-        return False
+    return True  # Return immediately, email will be sent in background

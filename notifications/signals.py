@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from notifications.models import Notification
 from bookings.models import Booking
-from notifications.utils import send_booking_email_notification, send_booking_whatsapp_notification
+from notifications.utils import send_booking_email_notification
 import traceback
 
 User = get_user_model()
@@ -23,7 +23,6 @@ def send_booking_notification(booking: Booking):
         
         # Email notification - uses ADMIN_EMAIL (can be different)
         admin_email = settings.ADMIN_EMAIL if hasattr(settings, 'ADMIN_EMAIL') else 'admin@luxedrive.com'
-        admin_phone = settings.ADMIN_PHONE if hasattr(settings, 'ADMIN_PHONE') else None
         
         # Get the admin user for in-app notification
         admin_user = None
@@ -66,10 +65,6 @@ def send_booking_notification(booking: Booking):
         
         # 2. Send email to ADMIN_EMAIL (separate from in-app notification)
         send_booking_email_notification(booking, admin_email)
-        
-        # 3. Send WhatsApp notification (using Twilio or similar)
-        if admin_phone:
-            send_booking_whatsapp_notification(booking, admin_phone)
         
         print(f"Notification sent for booking {booking.booking_reference}")
         
