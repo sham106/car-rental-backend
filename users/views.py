@@ -8,9 +8,14 @@ from bookings.models import Booking
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    license_image_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'phone_number', 'license_number', 'membership_tier', 'points', 'date_joined', 'is_staff')
+        fields = ('id', 'email', 'first_name', 'last_name', 'phone_number', 'license_number', 'membership_tier', 'points', 'date_joined', 'is_staff', 'license_image_url')
+    
+    def get_license_image_url(self, obj):
+        return getattr(obj, 'license_image_url', None)
 
 class RegisterSerializer(serializers.ModelSerializer):
     """
