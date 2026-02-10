@@ -21,7 +21,7 @@ from django.urls import path, include, re_path
 from django.views.static import serve
 from rest_framework.routers import DefaultRouter
 from fleet.views import VehicleViewSet
-from bookings.views import BookingListCreateView, BookingDetailView, check_vehicle_availability
+from bookings.views import BookingListCreateView, BookingDetailView, check_vehicle_availability, get_vehicle_booked_dates
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -37,6 +37,7 @@ urlpatterns = [
     path('api/bookings/', BookingListCreateView.as_view(), name='booking-list'),
     path('api/bookings/<int:pk>/', BookingDetailView.as_view(), name='booking-detail'),
     path('api/vehicles/<int:vehicle_id>/availability/', check_vehicle_availability, name='vehicle-availability'),
+    path('api/vehicles/<int:vehicle_id>/booked-dates/', get_vehicle_booked_dates, name='vehicle-booked-dates'),
     # Authentication & Profile
     path('api/auth/', include('users.urls')),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

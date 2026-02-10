@@ -102,6 +102,36 @@ class BookingDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 @api_view(['GET'])
+def get_vehicle_booked_dates(request, vehicle_id):
+    """
+    Get all booked dates for a vehicle (for calendar display).
+    Returns a list of date ranges that are booked.
+    """
+    from django.utils.dateparse import parse_date
+    
+    # Get all confirmed/pending/active bookings for this vehicle
+    bookings = Booking.objects.filter(
+        vehicle_id=vehicle_id,
+        status__in=['PENDING', 'CONFIRMED', 'ACTIVE']
+    ).order_by('pickup_date')
+    
+    booked_dates = []
+    for booking in bookings:
+        booked_dates.append({
+            'id': booking.id,
+            'pickup_date': booking.pickup_date.isoformat(),
+            'return_date': booking.return_date.isoformat(),
+            'status': booking.status,
+            'user_name': booking.driver_name,
+        })
+    
+    return Response({
+        'vehicle_id': vehicle_id,
+        'bookings': booked_dates,
+    })
+
+
+@api_view(['GET'])
 def check_vehicle_availability(request, vehicle_id):
     """
     Check if a vehicle is available for given dates.
